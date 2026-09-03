@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Configurator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #1a1a2e;
+            padding: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #1a1a2e;
+            font-size: 18px;
+        }
+
+        .component-group {
+            margin-bottom: 16px;
+        }
+
+        .component-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .component-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .price-total {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .price-total span {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .compatibility {
+            margin-top: 12px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .compatibility.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .compatibility.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #map {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 16px;
+        }
+
+        .store-list {
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .store-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .store-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .store-item.selected {
+            background: #1a1a2e;
+            color: white;
+            border-color: #1a1a2e;
+        }
+
+        .delivery-cost {
+            margin-top: 12px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Сохранённые сборки */
+        .saved-list {
+            margin-top: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .saved-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: #f9f9f9;
+        }
+
+        .saved-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .saved-date {
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .saved-price {
+            font-size: 14px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .saved-details {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .saved-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .load-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .load-btn:hover {
+            background: #218838;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        /* ЛОГ (ЧАТ-СТИЛЬ) */
+        .logs-list {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .log-message {
+            background: white;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 4px solid #1a1a2e;
+        }
+
+        .log-sender {
+            font-weight: bold;
+            font-size: 12px;
+            color: #1a1a2e;
+        }
+
+        .log-text {
+            font-size: 13px;
+            margin: 4px 0;
+        }
+
+        .log-time {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .empty-log {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        .saved-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #ff6b6b;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .logo {
+                font-size: 22px;
+            }
+            #map {
+                height: 280px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">PC Configurator Pro</div>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <!-- ЛЕВАЯ КОЛОНКА: Конфигуратор ПК -->
+            <div class="card">
+                <h2>Сборка ПК</h2>
+                <div class="component-group">
+                    <label>Процессор</label>
+                    <select id="cpu">
+                        <option value="">Выберите процессор</option>
+                    </select>
+                </div>
+                <div class="component-group">
+                    <label>Материнская плата</label>
+                    <select id="motherboard">
+                        <option value="">Выберите материнскую плату</option>
+                    </select>
+                </div>
+                <div class="component-group">
+                    <label>Видеокарта</label>
+                    <select id="gpu">
+                        <option value="">Выберите видеокарту</option>
+                    </select>
+                </div>
+                <div class="component-group">
+                    <label>Оперативная память</label>
+                    <select id="ram">
+                        <option value="">Выберите ОЗУ</option>
+                    </select>
+                </div>
+                <div class="component-group">
+                    <label>SSD накопитель</label>
+                    <select id="ssd">
+                        <option value="">Выберите SSD</option>
+                    </select>
+                </div>
+                <div class="component-group">
+                    <label>Блок питания</label>
+                    <select id="psu">
+                        <option value="">Выберите БП</option>
+                    </select>
+                </div>
+                <div id="compatibility" class="compatibility"></div>
+                <div class="price-total">
+                    Итого: <span id="totalPrice">0</span> руб.
+                </div>
+                <button id="saveConfigBtn" class="btn-primary">Сохранить сборку</button>
+            </div>
+
+            <!-- ПРАВАЯ КОЛОНКА -->
+            <div class="card">
+                <h2>Магазины и доставка</h2>
+                <div id="map"></div>
+                <div class="store-list" id="storeList"></div>
+                <div id="deliveryCost" class="delivery-cost"></div>
+                
+                <!-- СОХРАНЁННЫЕ СБОРКИ -->
+                <div class="saved-header">
+                    <h2>Сохранённые сборки</h2>
+                    <span id="savedCount" style="background: #1a1a2e; color: white; padding: 2px 8px; border-radius: 12px;">0</span>
+                </div>
+                <div id="savedConfigsList" class="saved-list"></div>
+                
+                <!-- ЛОГ (ЧАТ-СТИЛЬ) -->
+                <div class="saved-header">
+                    <h2>Лог действий (чат-стиль)</h2>
+                    <span id="logCount" style="background: #1a1a2e; color: white; padding: 2px 8px; border-radius: 12px;">0</span>
+                </div>
+                <div id="logsList" class="logs-list"></div>
+                <button id="clearLogBtn" class="btn-danger">Очистить лог</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== ДАННЫЕ КОМПЛЕКТУЮЩИХ ==========
+        const components = {
+            cpu: [
+                { id: 'cpu1', name: 'Intel Core i5-12400', price: 15000, socket: 'LGA1700', tdp: 65 },
+                { id: 'cpu2', name: 'Intel Core i7-12700', price: 25000, socket: 'LGA1700', tdp: 125 },
+                { id: 'cpu3', name: 'AMD Ryzen 5 5600', price: 14000, socket: 'AM4', tdp: 65 },
+                { id: 'cpu4', name: 'AMD Ryzen 7 5800X', price: 22000, socket: 'AM4', tdp: 105 }
+            ],
+            motherboard: [
+                { id: 'mb1', name: 'ASUS Prime B660M', price: 8000, socket: 'LGA1700', ramType: 'DDR4' },
+                { id: 'mb2', name: 'MSI B550-A PRO', price: 9000, socket: 'AM4', ramType: 'DDR4' },
+                { id: 'mb3', name: 'Gigabyte Z690', price: 12000, socket: 'LGA1700', ramType: 'DDR5' },
+                { id: 'mb4', name: 'ASRock B550M', price: 7500, socket: 'AM4', ramType: 'DDR4' }
+            ],
+            gpu: [
+                { id: 'gpu1', name: 'RTX 3060 12GB', price: 30000, power: 170 },
+                { id: 'gpu2', name: 'RTX 4070 12GB', price: 55000, power: 200 },
+                { id: 'gpu3', name: 'RX 6700 XT', price: 35000, power: 230 },
+                { id: 'gpu4', name: 'RTX 4090 24GB', price: 140000, power: 450 }
+            ],
+            ram: [
+                { id: 'ram1', name: '16GB DDR4 3200MHz', price: 4000, type: 'DDR4' },
+                { id: 'ram2', name: '32GB DDR4 3200MHz', price: 7000, type: 'DDR4' },
+                { id: 'ram3', name: '16GB DDR5 5200MHz', price: 6000, type: 'DDR5' },
+                { id: 'ram4', name: '32GB DDR5 5200MHz', price: 11000, type: 'DDR5' }
+            ],
+            ssd: [
+                { id: 'ssd1', name: 'SSD 500GB NVMe', price: 3000 },
+                { id: 'ssd2', name: 'SSD 1TB NVMe', price: 5000 },
+                { id: 'ssd3', name: 'SSD 2TB NVMe', price: 9000 }
+            ],
+            psu: [
+                { id: 'psu1', name: '500W 80+ Bronze', price: 3500, wattage: 500 },
+                { id: 'psu2', name: '650W 80+ Gold', price: 5500, wattage: 650 },
+                { id: 'psu3', name: '750W 80+ Gold', price: 7000, wattage: 750 },
+                { id: 'psu4', name: '1000W 80+ Platinum', price: 12000, wattage: 1000 }
+            ]
+        };
+
+        // Данные магазинов
+        const stores = [
+            { id: 1, name: 'Электронный мир (Центр)', address: 'ул. Тверская, 15', lat: 55.757, lon: 37.614, delivery: 0 },
+            { id: 2, name: 'Пункт выдачи Северный', address: 'Дмитровское ш., 88', lat: 55.847, lon: 37.575, delivery: 200 },
+            { id: 3, name: 'Пункт выдачи Южный', address: 'ул. Южнобутовская, 33', lat: 55.542, lon: 37.585, delivery: 200 },
+            { id: 4, name: 'TechPark Западный', address: 'Кутузовский пр., 10', lat: 55.743, lon: 37.542, delivery: 300 }
+        ];
+
+        // Глобальные переменные
+        let selectedStore = null;
+        let currentConfig = {
+            cpu: null, motherboard: null, gpu: null, ram: null, ssd: null, psu: null
+        };
+        let map = null;
+        let markers = [];
+        
+        // ========== ЛОГ (ЧАТ-СТИЛЬ) ==========
+        let logs = [];
+
+        function addLog(sender, text) {
+            logs.unshift({
+                id: Date.now(),
+                sender: sender,
+                text: text,
+                time: new Date().toLocaleTimeString()
+            });
+            displayLogs();
+        }
+
+        function displayLogs() {
+            const container = document.getElementById('logsList');
+            const countSpan = document.getElementById('logCount');
+            
+            if (!container) return;
+            
+            countSpan.innerText = logs.length;
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="empty-log">Нет сообщений</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            logs.forEach(log => {
+                const div = document.createElement('div');
+                div.className = 'log-message';
+                div.innerHTML = `
+                    <div class="log-sender">${log.sender}</div>
+                    <div class="log-text">${log.text}</div>
+                    <div class="log-time">${log.time}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function clearLog() {
+            logs = [];
+            displayLogs();
+            addLog('Система', 'Лог очищен');
+        }
+
+        // ========== КАРТА ==========
+        function initMap() {
+            map = L.map('map').setView([55.756, 37.617], 11);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+               //f attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+            
+            stores.forEach(store => {
+                const marker = L.marker([store.lat, store.lon]).addTo(map);
+                marker.bindPopup(`<b>${store.name}</b><br>${store.address}<br>${store.delivery === 0 ? 'Самовывоз' : 'Доставка: ' + store.delivery + ' руб.'}`);
+                marker.on('click', () => selectStore(store));
+                markers.push({ marker, store });
+            });
+        }
+
+        function highlightStoreOnMap(store) {
+            markers.forEach(item => {
+                if (item.store.id === store.id) {
+                    item.marker.openPopup();
+                    map.setView([store.lat, store.lon], 14);
+                }
+            });
+        }
+
+        // ========== КОНФИГУРАТОР ==========
+        function loadSelects() {
+            const selects = ['cpu', 'motherboard', 'gpu', 'ram', 'ssd', 'psu'];
+            selects.forEach(selectId => {
+                document.getElementById(selectId).innerHTML = '<option value="">Выберите</option>';
+            });
+
+            components.cpu.forEach(cpu => {
+                document.getElementById('cpu').innerHTML += `<option value="${cpu.id}">${cpu.name} (${cpu.price} руб.)</option>`;
+            });
+            components.motherboard.forEach(mb => {
+                document.getElementById('motherboard').innerHTML += `<option value="${mb.id}">${mb.name} (${mb.price} руб.)</option>`;
+            });
+            components.gpu.forEach(gpu => {
+                document.getElementById('gpu').innerHTML += `<option value="${gpu.id}">${gpu.name} (${gpu.price} руб.)</option>`;
+            });
+            components.ram.forEach(ram => {
+                document.getElementById('ram').innerHTML += `<option value="${ram.id}">${ram.name} (${ram.price} руб.)</option>`;
+            });
+            components.ssd.forEach(ssd => {
+                document.getElementById('ssd').innerHTML += `<option value="${ssd.id}">${ssd.name} (${ssd.price} руб.)</option>`;
+            });
+            components.psu.forEach(psu => {
+                document.getElementById('psu').innerHTML += `<option value="${psu.id}">${psu.name} (${psu.price} руб.)</option>`;
+            });
+        }
+
+        function checkCompatibility() {
+            const cpu = components.cpu.find(c => c.id === currentConfig.cpu);
+            const mb = components.motherboard.find(m => m.id === currentConfig.motherboard);
+            const ram = components.ram.find(r => r.id === currentConfig.ram);
+            const gpu = components.gpu.find(g => g.id === currentConfig.gpu);
+            const psu = components.psu.find(p => p.id === currentConfig.psu);
+
+            let errors = [];
+            let totalPower = 0;
+
+            if (cpu && mb) {
+                if (cpu.socket !== mb.socket) {
+                    errors.push('Сокет процессора не подходит к материнской плате');
+                }
+                totalPower += cpu.tdp || 0;
+            }
+
+            if (ram && mb) {
+                if (ram.type !== mb.ramType) {
+                    errors.push('Тип ОЗУ не поддерживается материнской платой');
+                }
+            }
+
+            if (gpu) totalPower += gpu.power || 0;
+            if (cpu) totalPower += 50;
+            if (ram) totalPower += 15;
+            if (currentConfig.ssd) totalPower += 10;
+
+            if (psu && totalPower > 0 && psu.wattage < totalPower) {
+                errors.push('Блок питания недостаточной мощности');
+            }
+
+            const compatDiv = document.getElementById('compatibility');
+            if (errors.length > 0) {
+                compatDiv.className = 'compatibility error';
+                compatDiv.innerHTML = errors.join('; ');
+                return false;
+            } else {
+                compatDiv.className = 'compatibility ok';
+                compatDiv.innerHTML = 'Все компоненты совместимы';
+                return true;
+            }
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            const keys = ['cpu', 'motherboard', 'gpu', 'ram', 'ssd', 'psu'];
+            keys.forEach(key => {
+                const id = currentConfig[key];
+                if (id) {
+                    const comp = components[key].find(c => c.id === id);
+                    if (comp) total += comp.price;
+                }
+            });
+            document.getElementById('totalPrice').innerText = total.toLocaleString();
+            return total;
+        }
+
+        function updateSelection() {
+            currentConfig.cpu = document.getElementById('cpu').value || null;
+            currentConfig.motherboard = document.getElementById('motherboard').value || null;
+            currentConfig.gpu = document.getElementById('gpu').value || null;
+            currentConfig.ram = document.getElementById('ram').value || null;
+            currentConfig.ssd = document.getElementById('ssd').value || null;
+            currentConfig.psu = document.getElementById('psu').value || null;
+            checkCompatibility();
+            calculateTotal();
+        }
+
+        function loadConfigToForm(config) {
+            document.getElementById('cpu').value = config.cpu || '';
+            document.getElementById('motherboard').value = config.motherboard || '';
+            document.getElementById('gpu').value = config.gpu || '';
+            document.getElementById('ram').value = config.ram || '';
+            document.getElementById('ssd').value = config.ssd || '';
+            document.getElementById('psu').value = config.psu || '';
+            
+            currentConfig.cpu = config.cpu || null;
+            currentConfig.motherboard = config.motherboard || null;
+            currentConfig.gpu = config.gpu || null;
+            currentConfig.ram = config.ram || null;
+            currentConfig.ssd = config.ssd || null;
+            currentConfig.psu = config.psu || null;
+            
+            checkCompatibility();
+            calculateTotal();
+        }
+
+        function getComponentName(compType, compId) {
+            if (!compId) return 'Не выбран';
+            const comp = components[compType].find(c => c.id === compId);
+            return comp ? comp.name : 'Не выбран';
+        }
+
+        // ========== СОХРАНЕНИЕ СБОРОК ==========
+        function saveConfigToStorage() {
+            const hasComponents = Object.values(currentConfig).some(v => v !== null);
+            if (!hasComponents) {
+                addLog('Система', 'Ошибка: выберите хотя бы один компонент');
+                alert('Выберите хотя бы один компонент');
+                return;
+            }
+            
+            let saved = JSON.parse(localStorage.getItem('pc_configs') || '[]');
+            const total = calculateTotal();
+            
+            saved.push({
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                config: {
+                    cpu: currentConfig.cpu,
+                    motherboard: currentConfig.motherboard,
+                    gpu: currentConfig.gpu,
+                    ram: currentConfig.ram,
+                    ssd: currentConfig.ssd,
+                    psu: currentConfig.psu
+                },
+                total: total
+            });
+            
+            localStorage.setItem('pc_configs', JSON.stringify(saved));
+            displaySavedConfigs();
+            addLog('Пользователь', 'Сохранена сборка на сумму ' + total.toLocaleString() + ' руб.');
+            alert('Сборка сохранена');
+        }
+
+        function deleteConfig(id) {
+            let saved = JSON.parse(localStorage.getItem('pc_configs') || '[]');
+            const deleted = saved.find(item => item.id === id);
+            saved = saved.filter(item => item.id !== id);
+            localStorage.setItem('pc_configs', JSON.stringify(saved));
+            displaySavedConfigs();
+            if (deleted) {
+                addLog('Пользователь', 'Удалена сборка от ' + deleted.date);
+            }
+        }
+
+        function displaySavedConfigs() {
+            const saved = JSON.parse(localStorage.getItem('pc_configs') || '[]');
+            const container = document.getElementById('savedConfigsList');
+            const countSpan = document.getElementById('savedCount');
+            
+            countSpan.innerText = saved.length;
+            
+            if (saved.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Нет сохранённых сборок</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            const reversed = [...saved].reverse();
+            
+            reversed.forEach(item => {
+                const cpuName = getComponentName('cpu', item.config.cpu);
+                const mbName = getComponentName('motherboard', item.config.motherboard);
+                const div = document.createElement('div');
+                div.className = 'saved-item';
+                div.innerHTML = `
+                    <div class="saved-item-header">
+                        <span class="saved-date">${item.date}</span>
+                        <span class="saved-price">${item.total.toLocaleString()} руб.</span>
+                    </div>
+                    <div class="saved-details">
+                        CPU: ${cpuName}<br>
+                        Материнская плата: ${mbName}
+                    </div>
+                    <div class="saved-buttons">
+                        <button class="load-btn" data-id="${item.id}">Загрузить</button>
+                        <button class="delete-btn" data-id="${item.id}">Удалить</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.querySelectorAll('.load-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    const savedItems = JSON.parse(localStorage.getItem('pc_configs') || '[]');
+                    const configItem = savedItems.find(item => item.id === id);
+                    if (configItem) {
+                        loadConfigToForm(configItem.config);
+                        addLog('Пользователь', 'Загружена сборка от ' + configItem.date);
+                        alert('Сборка загружена');
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    deleteConfig(id);
+                });
+            });
+        }
+
+        function clearStorage() {
+            if (confirm('Очистить все сохранённые сборки?')) {
+                localStorage.removeItem('pc_configs');
+                displaySavedConfigs();
+                addLog('Система', 'Все сохранённые сборки удалены');
+                alert('Все сборки удалены');
+            }
+        }
+
+        // ========== МАГАЗИНЫ ==========
+        function loadStores() {
+            const container = document.getElementById('storeList');
+            container.innerHTML = '';
+            stores.forEach(store => {
+                const div = document.createElement('div');
+                div.className = 'store-item' + (selectedStore?.id === store.id ? ' selected' : '');
+                div.innerHTML = `
+                    <strong>${store.name}</strong><br>
+                    ${store.address}<br>
+                    ${store.delivery === 0 ? 'Самовывоз' : 'Доставка: ' + store.delivery + ' руб.'}
+                `;
+                div.onclick = () => selectStore(store);
+                container.appendChild(div);
+            });
+        }
+
+        function selectStore(store) {
+            selectedStore = store;
+            loadStores();
+            updateDeliveryCost();
+            highlightStoreOnMap(store);
+            localStorage.setItem('selected_store', store.id);
+            addLog('Пользователь', 'Выбран магазин: ' + store.name);
+        }
+
+        function updateDeliveryCost() {
+            const deliveryDiv = document.getElementById('deliveryCost');
+            if (selectedStore) {
+                if (selectedStore.delivery === 0) {
+                    deliveryDiv.innerHTML = 'Самовывоз - бесплатно';
+                } else {
+                    deliveryDiv.innerHTML = 'Доставка: ' + selectedStore.delivery + ' руб.';
+                }
+            } else {
+                deliveryDiv.innerHTML = 'Выберите магазин или пункт выдачи';
+            }
+        }
+
+        function loadFromStorage() {
+            const savedStore = localStorage.getItem('selected_store');
+            if (savedStore) {
+                const store = stores.find(s => s.id === parseInt(savedStore));
+                if (store) selectStore(store);
+            }
+            displaySavedConfigs();
+        }
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        function init() {
+            loadSelects();
+            loadStores();
+            initMap();
+            loadFromStorage();
+            
+            const selects = ['cpu', 'motherboard', 'gpu', 'ram', 'ssd', 'psu'];
+            selects.forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    updateSelection();
+                    addLog('Пользователь', 'Изменена конфигурация');
+                });
+            });
+            
+            document.getElementById('saveConfigBtn').onclick = saveConfigToStorage;
+            document.getElementById('clearLogBtn').onclick = clearLog;
+            document.getElementById('clearStorageBtn')?.addEventListener('click', clearStorage);
+            
+            updateSelection();
+            addLog('Система', 'Приложение запущено');
+            addLog('Система', 'Доступно ' + stores.length + ' магазинов');
+        }
+        
+        init();
+    </script>
+</body>
+</html>
